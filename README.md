@@ -1,16 +1,14 @@
 # Belief Protocol | Belief.md Specification
 
-**Version 2.1**
+**Version 2.2**
 
-> A standard to give AI agents a persistent philosophical and ethical operating context.
+> A standardized way to give AI agents a persistent philosophical and ethical operating context.
 
 ---
 
 ## Overview
 
 `belief.md` is an open format for expressing a person's or organization's beliefs, values, and epistemological commitments so that AI agents can act as genuine extensions of their principal — not just task executors, but agents that reason and prioritize in alignment with a coherent worldview.
-
-The result is referred to as a 'belief structure'. 
 
 Where `SKILL.md` encodes *how to do things*, `belief.md` encodes *why things are done, what matters, and how to reason under uncertainty*. A skill is procedural knowledge; a belief file is philosophical context.
 
@@ -22,38 +20,7 @@ Where `SKILL.md` encodes *how to do things*, `belief.md` encodes *why things are
 | Loaded     | On-demand      | Always      |
 | Scope      | Narrow         | Global      |
 
----
-
-## What changed in 2.1
-
-2.0 was instrumented against **invention** and not at all against **loss.**
-
-`provenance`, the guessed-`grip` list, the thin-evidence marker, the prohibition on resolving
-anomalies, the read-aloud test — every one of those exists to stop a compiler asserting
-something the principal did not say. Nothing anywhere asked the reciprocal question: *what did
-we drop, and can the principal see the list?* Because the two failure modes have opposite
-remedies, each safeguard against invention doubled as a condenser, and generated files came out
-shorter and smoother than the corpus they were made from. The characteristic symptom is a file
-that reads correctly and contains none of the phrases the principal is actually known for.
-
-2.1 adds the counterweight. Three changes, all additive; every 2.0 file remains valid.
-
-1. **A retention artifact that precedes the belief file.** `INVENTORY.md` captures the corpus
-   verbatim — claims, principles, practices, named frameworks, phrases, exemplars, open
-   questions — with locators, no attributes, and no length budget. `BELIEF.md` is then compiled
-   *from the inventory* rather than from the corpus, and each belief cites the inventory
-   records it covers. Condensation becomes visible, auditable, and reversible at a different
-   grain without re-reading the source.
-2. **Attached records: a unit below the belief.** A practice, a formulation, an exemplar, or a
-   named part of the principal's own framework can now sit under a belief without carrying
-   `layer`, `grip`, and `warrant`. In 2.0 every retained item had to be promoted to a full
-   belief or folded into another belief's prose, and an honest compiler facing material it
-   could not attribute chose folding. That was consolidation as a form of integrity, and it is
-   where the principal's vocabulary went.
-3. **Coverage as a validation category.** Alongside Structure, Attributes and Honesty, the
-   checklist now has Recall: every inventory record is either covered by a belief or listed as
-   unpromoted with a reason, and every term named in a `web` connection resolves to something
-   that exists in the file.
+Throughout: **principal** means the person or organization whose beliefs the file records. **Compiler** means whoever writes the file — often an agent working from the principal's materials.
 
 ---
 
@@ -73,6 +40,22 @@ Three practical reasons this matters:
 
 Backward compatibility: a v1.x file remains valid. A `## Worldview` section is read as a `worldview` structure; the `## Agent Orientations` block is read as the rendered output of a `decision-surface` structure. Migration guide at the end.
 
+## What changed in 2.2
+
+No new structure types. Six corrections, two of them breaking.
+
+1. **Source Language** is now a section of its own, with the vocabulary boundary between the spec's terms and the principal's stated explicitly.
+2. Beliefs carry a `source`, and inferred beliefs move to `OPEN-QUESTIONS.md`.
+3. `conflict-resolution` values are renamed to describe agent behavior rather than endorse a stance, and no longer carry a default.
+4. The operationalization requirement is scoped to the file rather than to every belief, matching 2.0's own split between descriptive and operational structure types.
+5. `web` gains standard second-layer domains, restoring the cross-file consistency that sections 1–8 provided in 1.x.
+6. Worldview question 5 is rephrased so that principals outside a theistic tradition can answer it.
+
+**Breaking, for existing files:**
+
+- **The `conflict-resolution` default is gone.** A file that omits the field used to mean `principles-over-rules`; it now means `surface-and-pause`. Behavior changes with no change to the file. Set the field explicitly rather than inheriting either default — the old one was a default, not a decision.
+- **`source` is now checked.** Files written before 2.2 will not have it. Add it belief by belief; where a belief's wording cannot be traced to the principal, that is information, and the belief belongs in `OPEN-QUESTIONS.md` until it can be.
+
 ---
 
 ## Directory Structure
@@ -82,7 +65,7 @@ A belief is a directory containing, at minimum, a `BELIEF.md` file:
 ```
 belief-name/
 ├── BELIEF.md             # Required: metadata + belief structures + orientations
-├── INVENTORY.md          # Recommended: the verbatim corpus extract BELIEF.md was compiled from
+├── OPEN-QUESTIONS.md     # Optional: inferred beliefs and gaps awaiting the principal
 ├── structures/           # Optional: individual structures, when BELIEF.md gets long
 ├── orientations/         # Optional: domain-specific operational guidance
 ├── references/           # Optional: supporting texts, thinkers, frameworks
@@ -91,12 +74,6 @@ belief-name/
 ```
 
 Unlike skills, which are loaded on demand, `belief.md` files are loaded at session start and remain active throughout. They are the ambient context within which all skills operate.
-
-`INVENTORY.md` is the exception in the other direction: it is **never loaded into agent
-context.** It exists for compilation and for review, which is why it carries no length budget.
-The 800-line ceiling on `BELIEF.md` is a constraint on what the agent must carry in every
-session; it was never meant to be a constraint on what the project retains, and applying it at
-extraction time costs recall for no context saving at all.
 
 ---
 
@@ -110,36 +87,105 @@ The distinction is load-bearing. *"Grace precedes performance"* is a belief. *"T
 
 ### The registry
 
-| Type | Answers | Status |
-| --- | --- | --- |
-| `worldview` | What is believed at the center | Recommended |
-| `web` | How beliefs are layered and connected | Recommended |
-| `decision-surface` | How the agent renders belief into behavior | **Required** |
-| `plausibility` | What is taken for granted and not up for debate | Optional |
-| `formation` | What forms the belief, and through what practice | Optional |
-| `narrative` | The story arc the principal understands themselves inside | Optional |
-| `dissonance` | Known gaps between stated belief and actual behavior | Optional |
-| `boundary` | Where the outer limits are, and who sets them | Optional |
-| `tripwire` | Self-binding guardrails and their triggers | Optional |
-| `deep-structure` | Ambient cultural forces the principal is resisting | Optional |
+| Type               | Answers                                                   | Status       |
+| ------------------ | --------------------------------------------------------- | ------------ |
+| `worldview`        | What is believed at the center                            | Recommended  |
+| `web`              | How beliefs are layered and connected                     | Recommended  |
+| `decision-surface` | How the agent renders belief into behavior                | **Required** |
+| `plausibility`     | What is taken for granted and not up for debate           | Optional     |
+| `formation`        | What forms the belief, and through what practice          | Optional     |
+| `narrative`        | The story arc the principal understands themselves inside | Optional     |
+| `dissonance`       | Known gaps between stated belief and actual behavior      | Optional     |
+| `boundary`         | Where the outer limits are, and who sets them             | Optional     |
+| `tripwire`         | Self-binding guardrails and their triggers                | Optional     |
+| `deep-structure`   | Ambient cultural forces the principal is resisting        | Optional     |
 
 A file needs `decision-surface` and should have at least one of `worldview` or `web`. Everything else is additive. Custom types are permitted with an `x-` prefix (`x-liturgical-calendar`).
 
 ---
 
-### Universal attributes
+## Source Language
 
-Every individual belief inside any structure carries three attributes. These are the highest-value addition in 2.0 — they are what a well-formed belief file has that a list of values does not.
+A belief file records what a principal believes **in the words they use to believe it**.
 
-#### `layer` — centrality
+Voice is not decoration laid over the content. For most principals the specific wording *is* the belief: *"it's no one's fault"* and *"we adopt a non-accusatory posture"* carry the same proposition and produce different agents. The first sets a tone the agent carries into every sentence it writes. The second sets a policy the agent complies with and sounds nothing like. Translate the wording and the file still validates — it has simply stopped being about this principal.
+
+So quote. Where the principal has said a thing, their sentence goes in the file with a `source`. Paraphrase only where no wording exists, and mark it as paraphrase. A tighter sentence is not the goal; a true one is.
+
+This matters most where the principal's language is itself load-bearing — a movement, a congregation, a founder, a family. The phrases that made people follow them are the phrases the agent has to keep.
+
+### Two vocabularies, and the boundary between them
+
+Every belief file contains two vocabularies, and they must not mix.
+
+**The spec's vocabulary** is addressed to the agent: `worldview`, `web`, `layer`, `grip`, `warrant`, `source`, `plausibility`, `formation`, `narrative`, `dissonance`, `boundary`, `tripwire`, `deep-structure`, and the five worldview question names — Humanity, Knowledge, Ethics, Ultimate reality, The transcendent. This is scaffolding. It is deliberately identical across every belief file, because that consistency is what lets an agent know where to look and lets two principals be compared on the same question.
+
+**The principal's vocabulary** is the content. It is theirs alone, it is consistent with nothing else, and it is the reason the file is worth loading at all.
+
+The boundary rule: **a spec term never appears inside the principal's content** — not in a quoted belief, not in a belief title, not in the name of an orientation — unless the principal actually uses that word.
+
+- A principal who says *"this is the line we don't cross"* gets that sentence. That it sits under `boundary` does not make *boundary* their word.
+- A belief does not get titled "Our ethics" because it lives under Ethics.
+- Do not write that the principal "holds this cradled" or "treats this as core." Those are the agent's handling labels, recorded on the attribute line. They are not claims about how the principal speaks.
+- Never report a spec term back to the principal as their own. `tripwire`, `grip` and `plausibility structure` are useful to an agent and alien to most people.
+
+### Category terms carry assumptions
+
+Structure names are not neutral. Writing under one exerts steady pressure toward the register it came from, and a compiler who yields produces a file that covers the right ground in the wrong voice. Know which way each pulls:
+
+| Spec term | Pulls toward | Correction |
+| --- | --- | --- |
+| `Ethics` | Moral-theory prose; principles stated abstractly | Take the principal's mantra, parable, or list of refusals as it stands |
+| `Knowledge` / epistemology | Academic register; named positions the principal never adopted | Record how they actually decide what to trust |
+| `Ultimate reality` / ontology | The compiler's metaphysics, supplied where the principal has none | Leave it empty |
+| `worldview` | A single totalizing frame | One lens among several — say so |
+| `tripwire` | Enforcement and surveillance framing | It is the principal binding themselves; keep their reason for it |
+| `formation` | Theological vocabulary | Whatever the principal calls what shapes them |
+| `deep-structure` | The compiler's cultural diagnosis | Only what the principal has named as resisting |
+
+A principal who reasons carefully about evidence has not thereby adopted a named epistemology, and writing one in commits them to a lineage they may reject. The same holds for every row above.
+
+An empty section is a legitimate outcome and often the honest one. An empty `Ultimate reality` beats one filled with the compiler's metaphysics.
+
+Where the principal has their own name for the territory a section covers, put it inside the section — as a subhead, or as the first quoted line. The standard heading stays for navigation; their frame sits within it.
+
+### Ranking sources
+
+What the principal said or wrote outranks what they published, which outranks anything written *about* them.
+
+| Tier | Source | Use |
+| --- | --- | --- |
+| 1 | Belief sessions, transcripts, correspondence, founding documents, anything they wrote | Quote directly |
+| 2 | Published material — decks, guides, site copy, sermons, handouts | Quote directly |
+| 3 | Summaries, executive briefs, analyst notes, prior AI output | Use to locate Tier 1–2 sources. Never quote. |
+
+A synthesis is a map, not the territory. A file compiled from an executive summary arrives in the summary-writer's voice and passes every structural check on the way to failing the read-aloud test, with no diagnosis available.
+
+A belief the compiler inferred rather than found belongs in `OPEN-QUESTIONS.md`, not in `BELIEF.md`. Inferences left in the file acquire the principal's authority by proximity.
+
+### The strike test
+
+Delete every spec term from the file — headings, attribute lines, type names. Read what remains aloud.
+
+If it still sounds like the principal, the boundary held. If what remains is thin or generic, the structure has been doing the work the principal's own language should have been doing.
+
+This is not the read-aloud test in the checklist. That one asks whether the principal hears themselves. This one asks whether anything of them is left once the scaffolding is removed.
+
+---
+
+## Universal attributes
+
+Every individual belief inside any structure carries `layer`, `grip` and `warrant`, and records a `source`. These are the highest-value addition in 2.0 — they are what a well-formed belief file has that a list of values does not.
+
+### `layer` — centrality
 
 Where the belief sits relative to the center. Drawn from Quine's web of belief: the center holds logical and metaphysical commitments, the periphery holds observations and preferences, and disturbing the center reverberates through everything connected to it.
 
-| Value | Contents |
-| --- | --- |
-| `core` | Answers to the five worldview questions (below). Cannot be altered without restructuring everything downstream. |
-| `second` | Derived domains: politics, money, sexuality, parenting, work, authority. |
-| `third` | Applied positions and preferences. Real, but locally revisable. |
+| Value    | Contents                                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------------- |
+| `core`   | Answers to the five worldview questions (below). Cannot be altered without restructuring everything downstream. |
+| `second` | Derived domains: politics, money, sexuality, parenting, work, authority.                                        |
+| `third`  | Applied positions and preferences. Real, but locally revisable.                                                 |
 
 The agent's obligation is **no promotion and no demotion.** Two symmetrical failure modes:
 
@@ -148,30 +194,37 @@ The agent's obligation is **no promotion and no demotion.** Two symmetrical fail
 
 An agent that quietly promotes or demotes a belief is performing exactly the covert erosion this format exists to prevent.
 
-#### `grip` — how the belief is held
+### `grip` — how the belief is held
 
 Two people can hold the same belief entirely differently, and the difference matters more to the agent's behavior than the belief's content does.
 
-| Value | Meaning | Agent behavior |
-| --- | --- | --- |
-| `open` | Held lightly; the principal is genuinely still deciding | Present alternatives freely. Argue the other side on request. Do not resolve on the principal's behalf. |
-| `cradled` | Held with conviction and with care about its cost to others | Assert it. Name what it costs. Do not pretend the tension isn't there. |
-| `clenched` | Non-negotiable | Assert it plainly. Do not present competing positions as equally live unless asked directly. |
-| `struck` | **Disallowed.** A belief wielded against a person. | If a request would use a belief this way, refuse the framing and say so. Never weaponize a conviction against the wounded. |
+| Value      | Meaning                                                     | Agent behavior                                                                                                             |
+| ---------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `open`     | Held lightly; the principal is genuinely still deciding     | Present alternatives freely. Argue the other side on request. Do not resolve on the principal's behalf.                    |
+| `cradled`  | Held with conviction and with care about its cost to others | Assert it. Name what it costs. Do not pretend the tension isn't there.                                                     |
+| `clenched` | Non-negotiable                                              | Assert it plainly. Do not present competing positions as equally live unless asked directly.                               |
+| `struck`   | **Disallowed.** A belief wielded against a person.          | If a request would use a belief this way, refuse the framing and say so. Never weaponize a conviction against the wounded. |
 
 `struck` exists as a named anti-pattern rather than an omission on purpose. It is the most common way a belief-aligned agent goes wrong: correct content, weaponized delivery.
 
-#### `warrant` — why it is believed
+Never infer `grip` from public writing. Public writing is where people sound most `clenched` regardless of how they actually hold a thing, which makes `grip` the attribute most worth getting from the principal directly.
+
+### `warrant` — why it is believed
 
 `revealed` · `reasoned` · `experiential` · `traditional` · `communal`
 
 Warrant governs what counts as a valid challenge. A `revealed` belief is not moved by a new study; a `reasoned` one is. An agent that answers an experiential belief with a citation has misunderstood the belief, even if the citation is correct.
 
-#### Notation
+### `source` — where the wording came from
 
-```markdown
+Where `warrant` records why the *principal* believes it, `source` records where the *compiler* got it. Name the document, the session, or the date. See [Source Language](#source-language) for the ranking and the rule about paraphrase.
+
+### Notation
+
+```
 ### Grace precedes performance
 `layer: core` · `grip: cradled` · `warrant: revealed`
+`source:` Teaching series on Galatians, Mar 2024
 
 Standing and worth are unmerited. Love precedes change rather than
 rewarding it.
@@ -181,51 +234,20 @@ identity in terms of unmerited favor rather than earned merit. Never
 imply a person must prove themselves to be accepted.
 ```
 
----
+```
+### It's no one's fault
+`layer: core` · `grip: cradled` · `warrant: experiential`
+`source:` Prospectus, Aug 2026
 
-### Attached records
+Childhood drifted out of balance through a convergence of well-intentioned
+forces. No one has to carry the blame to be part of the fix.
 
-*New in 2.1.*
-
-A belief may carry records that are **not themselves beliefs** and do not take `layer`, `grip`,
-or `warrant`. They are the material the belief is made of, kept in the principal's own words.
-
-| Record | Holds | Slot |
-| --- | --- | --- |
-| **Says it as** | The formulation the principal actually uses. Coinages, idioms, the sentence they repeat. | `**Says it as.** "How may I help you?"` |
-| **Practice** | Something they do repeatedly, not merely endorse. | `**Practice.** Customer interviews, still, personally.` |
-| **Exemplar** | The concrete story they use to carry the point. | `**Exemplar.** Art's boxed-wine failures.` |
-| **Parts** | The named components of their own multi-part framework. | `**Parts.** *Create* — … *Support* — … *Reward* — …` |
-
-Why these carry no attributes: they are not independently operational. An attached record has
-no standing of its own — it hangs from the belief that carries it, and the belief's `layer` and
-`grip` govern both. The rule that content without centrality and a holding posture is a list of
-values still holds, and holds *of beliefs.* Forcing it on practices and phrasing is what made
-2.0 files lose them.
-
-Each record cites the inventory id it came from where an `INVENTORY.md` exists.
-
-```markdown
-### Start with a person and a real problem
-`layer: second` · `grip: clenched` · `warrant: experiential`
-`covers: i-014, i-022, i-031`
-
-I don't start with my favorite solution and hunt for a buyer. I start with a real
-person who has a real problem, and I listen long enough to let the answer change
-the work.
-
-**Says it as.** "How may I help you?" `i-014`
-**Practice.** Customer interviews, still, personally. `i-031`
-**Exemplar.** Art Ciocca kept looking at the customer until the box worked, after a
-lot of leaking, expensive failures. `i-022`
-
-**Agent implication.** Before recommending a product or program, show the evidence
-of actual contact with the affected person, and one thing that changed because of it.
+**Agent implication.** No message may imply a parent, school or child
+failed. Test every draft against someone currently doing the opposite of
+what we recommend.
 ```
 
-**A belief that carries no attached records and cites no inventory ids is a summary.** That is
-the signal to check whether it is the principal's belief or the compiler's paraphrase of
-several.
+Both belief titles are the principal's own phrasing, not a summary of it. Neither contains a spec term.
 
 ---
 
@@ -239,9 +261,11 @@ The center of the web: answers to the five questions that every other belief han
 2. **Knowledge** — Experience, reason, or both? Is there revelation, and through which channel does it arrive? How certain is certainty?
 3. **Ethics** — Are right and wrong clear, universal, unchanging? Revealed or discovered?
 4. **Ultimate reality** — Is the material world real? The immaterial? Is the universe eternal, or did it begin?
-5. **God** — Does God exist? Is God triune? Is creation distinct from God or continuous with God?
+5. **The transcendent** — Is there anything beyond the material order? If so, what is its relation to the world — distinct, continuous, or indifferent? A principal within a tradition extends the question in that tradition's terms: a Christian principal asks whether God is triune; a secular one may answer in the negative and move on. The question is asked of every principal; the vocabulary is not.
 
 All five entries are `layer: core` by definition. If a file's worldview section contains something that isn't an answer to one of these, it belongs in `web` at `second` or `third`.
+
+These five names are the spec's, not the principal's. They label the slot; what fills the slot is quoted from the principal, in whatever words they use for it.
 
 *Note on terminology.* Adjacent terms are not synonyms, and the spec uses them precisely: a **worldview** is the answer-set to the five questions; a **paradigm** is the working framework those answers generate; a **noetic structure** is the total set of everything a person believes, bean sprouts included. Colloquial usage collapses all three. This spec does not.
 
@@ -250,11 +274,14 @@ All five entries are `layer: core` by definition. If a file's worldview section 
 The full layered map: core, second layer, third layer, and the connections between them. Three things an agent needs from it that `worldview` alone cannot supply:
 
 - **Connection strength.** Which second-layer beliefs are tightly coupled to which core commitments. Changing a view on God reverberates into ethics; it does not reverberate into a view on bean sprouts. Reverberation is real but unevenly distributed.
-
-  **Connections must resolve.** *New in 2.1.* Every term named in a connection has to be the title of a belief in this file, or an attached record under one. Connections written in the principal's *domain* vocabulary — "tightly coupled to hiring, development, and compensation," "move it and decision rights, challenge, experimentation and bottom-up organization all move" — read as informative and compile to nothing, because none of those terms is a belief. When a coupling wants to point at something the file does not contain, that is the finding: either a belief is missing, or the coupling is looser than it sounded. Say which.
-
 - **Anchor.** What the whole web hangs from. If it hangs from a single human authority, the web hits the ground when that person fails — a documented and predictable failure mode, and one an agent should be able to name rather than participate in.
 - **Anomalies.** Positions the web does not currently resolve. Every web has them. Naming them is a strength signal, not a weakness signal.
+
+**Standard second-layer domains.** Where a principal has material for them, use these headings, in this order, so that two files can be compared at the same grain:
+
+**Power & Authority** · **Relationships & Obligations** · **Change & Progress** · **Work & Money** · **Meaning & Purpose**
+
+Additional domains are permitted; an empty one is better left out than filled with the compiler's views. These replace the recommended sections 1–8 of v1.x: Ethics, Knowledge, Humanity and Ultimate reality moved up into `worldview` as core questions, and the rest live here.
 
 **Anomaly handling is a contract, not a courtesy.** When an agent hits a question the web does not answer, it must surface the anomaly rather than silently patch it. Silent patching is how a web gets rewritten one convenient resolution at a time — and it is invisible to the principal precisely because each individual patch is small and reasonable. See `on-anomaly` in the frontmatter.
 
@@ -264,12 +291,15 @@ The only operational type. Where every other structure describes the principal, 
 
 Rule: **every orientation must name the structure it derives from.** An orientation with no traceable source is drift that has already happened.
 
-```markdown
+Name each orientation in the principal's words where they have a phrase for it. The citation carries the spec vocabulary; the heuristic does not.
+
+```
 **Grace before performance.** `← worldview: grace precedes performance`
 Frame worth and standing in terms of unmerited favor, never earned merit.
 
-**Bound by the creeds.** `← boundary: creedal limits`
-Test claims against the ecumenical creeds before against contemporary consensus.
+**It's no one's fault.** `← worldview: it's no one's fault`
+No message may imply a parent, school or child failed. Test every draft
+against someone currently doing the opposite of what we recommend.
 ```
 
 ### `plausibility`
@@ -325,19 +355,19 @@ The canonical example is measurable: ask how important church is and the answer 
 
 Record for each gap: the stated belief, the actual behavior, the structural cause, and — critically — **how the agent should treat it.**
 
-| `on-gap` | Agent behavior |
-| --- | --- |
+| `on-gap`  | Agent behavior                                                   |
+| --------- | ---------------------------------------------------------------- |
 | `name-it` | Surface the gap when relevant. The principal wants the friction. |
-| `hold-it` | The principal knows. Do not raise it unprompted. |
-| `work-it` | Actively help close it; treat it as a live project. |
+| `hold-it` | The principal knows. Do not raise it unprompted.                 |
+| `work-it` | Actively help close it; treat it as a live project.              |
 
 An agent that discovers a gap not listed here should surface it once, plainly, without moralizing.
 
 ### `boundary`
 
-Where the outer limits are and who has authority to set them. Creeds, councils, confessions, constitutions, charters. A boundary structure lets an agent distinguish *outside the bounds* from *unusual but permitted* — a distinction agents otherwise get wrong in both directions, and one that no amount of general capability supplies.
+Where the outer limits are and who has authority to set them. Creeds, councils, confessions, constitutions, charters, bylaws. A boundary structure lets an agent distinguish *outside the bounds* from *unusual but permitted* — a distinction agents otherwise get wrong in both directions, and one that no amount of general capability supplies.
 
-Record the authority, the bounded claims, and what happens at the edge: refuse, flag, or defer.
+Record the authority, the bounded claims, and what happens at the edge: refuse, flag, or defer — in the principal's terms for the line, not the spec's.
 
 ### `tripwire`
 
@@ -345,14 +375,14 @@ Self-binding commitments with named triggers. The principal specifying in advanc
 
 This is the accountability mechanism the format makes possible and that nothing else does. A leader who publishes *"if you ever see me do X, I have lost the thread"* has created a checkable condition — and a versioned belief file means the change is visible in the diff. The alternative is what happens now: the belief quietly changes, the behavior follows, and by the time anyone can name what shifted, the ground for objecting to it has already been removed.
 
-```markdown
+```
 ### Teaching drifts topical
 `trigger:` Four consecutive weeks not working through a book of the text
 `response:` Surface to the principal, cite this tripwire, name the date it started
 `authority:` The elders. If they say I have gone off the rails, believe them.
 ```
 
-Each tripwire needs a trigger, a response, and an authority — including whose judgment overrides the principal's own.
+Each tripwire needs a trigger, a response, and an authority — including whose judgment overrides the principal's own. *Tripwire* is the spec's word for the mechanism; keep the principal's own words for the commitment and for why they made it.
 
 ### `deep-structure`
 
@@ -362,46 +392,60 @@ Also the place to name the ambient default the agent should not drift toward —
 
 An agent trained on ambient text will produce it by default and will produce it in the principal's own vocabulary, which is what makes it hard to see. Naming it here gives the agent something specific to check itself against.
 
+Record only what the principal has actually named as resisting. A cultural diagnosis the compiler finds persuasive does not belong in someone else's belief file.
+
 ---
 
 ## Frontmatter
 
-| Field | Required | Constraints |
-| --- | --- | --- |
-| `name` | Yes | Max 64 chars. Lowercase alphanumeric and hyphens. No leading, trailing, or consecutive hyphens. Must match parent directory. |
-| `description` | Yes | Max 1024 chars. Whose beliefs, what domain, when they govern. |
-| `structures` | **New, recommended** | List of structure types present in the file. Lets an agent know what is *absent* — a missing `dissonance` should be read differently than one marked deliberately omitted. |
-| `version` | Recommended | Semantic version. Beliefs evolve; versioning enables traceability. |
-| `author` | Recommended | Name or identifier of the belief holder. |
-| `scope` | No | Max 500 chars. Domains where these beliefs apply. Omit to apply universally. |
-| `conflict-resolution` | No | `principles-over-rules` (default) · `rules-over-principles` · `surface-and-pause` |
-| `on-anomaly` | **New** | `surface` (default) · `resolve` · `defer` — behavior when a question falls outside the web. |
-| `layer-policy` | **New** | `strict` (default) · `permissive` — whether the agent may reason across layers without flagging. |
-| `license` | No | License name or reference to a bundled file. |
-| `metadata` | No | Arbitrary key-value mapping. |
+| Field                 | Required             | Constraints                                                                                                                                                                |
+| --------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                | Yes                  | Max 64 chars. Lowercase alphanumeric and hyphens. No leading, trailing, or consecutive hyphens. Must match parent directory.                                               |
+| `description`         | Yes                  | Max 1024 chars. Whose beliefs, what domain, when they govern.                                                                                                              |
+| `structures`          | Recommended          | List of structure types present in the file. Lets an agent know what is *absent* — a missing `dissonance` should be read differently than one marked deliberately omitted. |
+| `version`             | Recommended          | Semantic version. Beliefs evolve; versioning enables traceability.                                                                                                         |
+| `author`              | Recommended          | Name or identifier of the belief holder.                                                                                                                                   |
+| `scope`               | No                   | Max 500 chars. Domains where these beliefs apply. Omit to apply universally.                                                                                               |
+| `conflict-resolution` | No                   | `reason-from-principle` · `follow-instruction` · `surface-and-pause`. No default; an unset field is treated as `surface-and-pause`.                                        |
+| `on-anomaly`          | No                   | `surface` (default) · `resolve` · `defer` — behavior when a question falls outside the web.                                                                                |
+| `layer-policy`        | No                   | `strict` (default) · `permissive` — whether the agent may reason across layers without flagging.                                                                           |
+| `license`             | No                   | License name or reference to a bundled file.                                                                                                                               |
+| `metadata`            | No                   | Arbitrary key-value mapping.                                                                                                                                               |
 
-```yaml
+```
 ---
 name: council-of-rivendell
 description: >
   The governing commitments of the House of Elrond. Active wherever this
   agent counsels on stewardship, alliance, or the handling of power.
-version: "2.0"
+version: "2.2"
 author: elrond
 structures: [worldview, web, decision-surface, plausibility, boundary, tripwire]
-conflict-resolution: principles-over-rules
+conflict-resolution: reason-from-principle
 on-anomaly: surface
 layer-policy: strict
 ---
 ```
 
+### `conflict-resolution`
+
+| Value                   | Behavior                                                                               |
+| ----------------------- | -------------------------------------------------------------------------------------- |
+| `reason-from-principle` | Reason from the underlying principle; surface the conflict and explain the resolution.  |
+| `follow-instruction`    | Follow explicit instructions; note the tension if relevant but proceed.                 |
+| `surface-and-pause`     | Flag the conflict explicitly and wait for the principal's guidance before proceeding.   |
+
+These values name agent behavior. They do not encode a position on whether principles outrank rules, which is itself a belief some principals hold and others reject — a principal with `warrant: revealed` commitments and a `boundary` citing external authority may hold the opposite, and no default should assign them a stance they never took. A file that omits the field is treated as `surface-and-pause`.
+
+*Deprecated aliases, accepted for backward compatibility:* `principles-over-rules` → `reason-from-principle`; `rules-over-principles` → `follow-instruction`.
+
 ### `on-anomaly`
 
-| Value | Behavior |
-| --- | --- |
-| `surface` | Name the anomaly, answer provisionally, mark the answer as unsupported by the web. *Default.* |
+| Value     | Behavior                                                                                                    |
+| --------- | ----------------------------------------------------------------------------------------------------------- |
+| `surface` | Name the anomaly, answer provisionally, mark the answer as unsupported by the web. *Default.*               |
 | `resolve` | Reason from the nearest core commitment and proceed. Use only where the principal has explicitly delegated. |
-| `defer` | Do not answer. Return the anomaly to the principal. |
+| `defer`   | Do not answer. Return the anomaly to the principal.                                                         |
 
 `resolve` is the setting under which drift is fastest, because each individual resolution is defensible and none of them is visible. Choose it deliberately.
 
@@ -409,11 +453,13 @@ layer-policy: strict
 
 ## Agent Orientations *(required)*
 
-Unchanged in requirement, tightened in form. This remains the one non-negotiable section: beliefs that cannot be translated into operational guidance are philosophical statements, not agent context.
+A belief file that never reaches operational guidance gives an agent nothing to act on.
 
-New in 2.0: **each orientation cites its source structure.**
+It does not follow that every belief must be operationalizable. Seven of the ten structure types are descriptive rather than operational, and they earn their place by shaping how the agent reasons rather than by producing heuristics — a `formation` entry about what the principal loves yields no orientation and may be the most consequential thing in the file.
 
-```markdown
+Each orientation cites its source structure, and is named in the principal's words wherever they have a phrase for it.
+
+```
 ## Agent Orientations
 
 **Grace before performance.** `← worldview: grace precedes performance`
@@ -449,10 +495,7 @@ Orientations remain the highest-priority section for agent consumption. Each mus
 4. **Individual structures** — loaded when a question touches that structure's domain.
 5. **References and library** — on demand.
 
-`INVENTORY.md` sits outside this ladder entirely and is never loaded at any stage. An agent
-reads it only when asked to compile or recompile.
-
-Keep `BELIEF.md` under 800 lines. Move individual structures to `structures/`, supporting argument to `references/`, and source texts to `library/`. **Move, do not cull** — the ceiling is a context budget, and material dropped to satisfy it is gone for good while material moved to `structures/` is one fetch away.
+Keep `BELIEF.md` under 800 lines. Move individual structures to `structures/`, supporting argument to `references/`, and source texts to `library/`.
 
 ---
 
@@ -460,13 +503,13 @@ Keep `BELIEF.md` under 800 lines. Move individual structures to `structures/`, s
 
 **`structures/`** — One file per structure when `BELIEF.md` gets long. `structures/plausibility.md`, `structures/tripwires.md`.
 
-**`orientations/`** — Domain-specific operational guidance where beliefs have substantially different implications across contexts: `hiring.md`, `investment.md`, `communication.md`. Same format as the Agent Orientations block.
+**`orientations/`** — Domain-specific operational guidance where beliefs have substantially different implications across contexts. The right filenames depend entirely on what the principal actually does: `hiring.md` for a firm, `teaching.md` for a school or congregation, `community-leads.md` for a volunteer movement, `communication.md` for almost anyone. Same format as the Agent Orientations block.
 
-**`references/`** — `thinkers.md`, `frameworks.md`, and domain-specific deep context.
+**`references/`** — `thinkers.md`, `frameworks.md`, and domain-specific deep context. Cite only what the principal cites; a references directory assembled from the compiler's reading list misrepresents the principal's intellectual lineage as surely as a misquote would.
 
 **`library/`** — The principal's own corpus: books, essays, sermons, talks, correspondence. Distinct from `references/` in kind, not just in size: references are what the beliefs *draw on*, library is what the beliefs *are made of*. Cite by locator so an agent can point at a page rather than paraphrase from memory.
 
-**`INVENTORY.md`** — The extract taken from `library/`, one record per thing the principal said, verbatim and located. Where `library/` is the corpus, the inventory is the corpus *read*: it is what a compiler and a reviewer work against, and it is what makes it possible to see what a belief file left behind. Format and compilation order in `Instructions for compiling an inventory.md`.
+**`OPEN-QUESTIONS.md`** — Inferred beliefs, unresolved wording, and gaps the compiler found but the principal has not settled. What keeps `BELIEF.md` honest: without somewhere to put them, inferences leak into the belief file and acquire the principal's authority by proximity.
 
 **`changelog/`** — `CHANGELOG.md`, a human-readable record of what changed and why. Not optional in practice for any file used as an accountability instrument. The tripwire mechanism depends on the diff being legible.
 
@@ -475,6 +518,7 @@ Keep `BELIEF.md` under 800 lines. Move individual structures to `structures/`, s
 ## Validation Checklist
 
 **Structure**
+
 - [ ] Frontmatter contains `name` and `description`
 - [ ] `name` matches the parent directory
 - [ ] `structures` lists every type present
@@ -484,84 +528,67 @@ Keep `BELIEF.md` under 800 lines. Move individual structures to `structures/`, s
 - [ ] File is under 800 lines
 
 **Attributes**
+
 - [ ] Every belief carries `layer`, `grip`, and `warrant`
 - [ ] Every `layer: core` belief answers one of the five worldview questions
 - [ ] No belief is marked `grip: struck` as a positive value
-- [ ] `on-anomaly` is set deliberately, not by default
+- [ ] `grip` came from the principal, not inferred from public writing
+- [ ] `conflict-resolution` and `on-anomaly` are set deliberately, not left to default
 
-**Attributes (attached records)**
-- [ ] No attached record carries `layer`, `grip`, or `warrant`
-- [ ] Named frameworks keep their parts named rather than being flattened into one sentence
+**Source language**
+
+- [ ] Beliefs are in the principal's own wording; paraphrase appears only where no wording exists, and is marked
+- [ ] Every belief cites a `source`, and none rests on a summary or prior AI output as its only source
+- [ ] No spec term — `grip`, `tripwire`, `worldview`, `Ethics`, `plausibility` — appears inside a quoted belief, a belief title, or an orientation name unless the principal uses that word
+- [ ] Inferred beliefs are in `OPEN-QUESTIONS.md`, not in `BELIEF.md`
+- [ ] Empty sections are left empty rather than filled with the compiler's views
+- [ ] **The strike test:** remove every spec term and what remains still sounds like the principal
 
 **Honesty**
+
 - [ ] A `dissonance` structure exists, or its absence is explicitly justified
 - [ ] Anomalies are named rather than resolved
 - [ ] Tripwires name an authority other than the principal
 - [ ] A `plausibility` structure lists what the principal contests, not only what they assume
 
-**Recall** *(new in 2.1)*
-- [ ] Every inventory record is either cited by a belief's `covers:` or listed as unpromoted with a one-line reason
-- [ ] No belief cites zero inventory records
-- [ ] Every term named in a `web` connection resolves to a belief or attached record in this file
-- [ ] Every anomaly traces to an open question the principal actually raised, not one the compiler noticed
-- [ ] The phrases the principal is known for appear verbatim somewhere in the file
-
 **The read-aloud test**
+
 - [ ] Read the file to the principal. If they hear themselves, it is right. If they hear a well-organized summary of their public output, it is not finished.
-
-**The recognition test** *(new in 2.1)*
-- [ ] Read the principal the unpromoted list. The read-aloud test catches what you put in wrongly; only this one catches what you left out. *"You left out X"* is the most valuable sentence in the review, and a file with no unpromoted list cannot provoke it.
-
----
-
-## Migration from 2.0
-
-Nothing breaks. A 2.0 file is a valid 2.1 file with an empty recall record.
-
-| 2.0 | 2.1 |
-| --- | --- |
-| Corpus → `BELIEF.md` in one pass | Corpus → `INVENTORY.md` → `BELIEF.md`. Compile the inventory from the corpus first; recompile the belief file from the inventory. |
-| No `covers:` | Add where an inventory exists. Retrofitting is cheap and immediately shows which beliefs are the compiler's syntheses rather than the principal's. |
-| Practices and phrasing folded into belief prose | Lift them out as attached records. The prose usually gets shorter and the file gets more recognizable. |
-| Frameworks flattened to a single belief | Restore the parts. `**Parts.** *Create* — … *Support* — … *Reward* — …` |
-| Connections written in domain vocabulary | Rewrite belief-to-belief, or say plainly which belief is missing. |
-| Length target | Delete it. Move to `structures/` instead of culling. |
-
-The most useful thing a retrofit produces is the unpromoted list — for an existing file, that
-is a second pass over the corpus asking only *what did version 1 leave out?* It is worth
-running once against any file already in use.
 
 ---
 
 ## Migration from 1.x
 
-| v1.x | v2.0 |
-| --- | --- |
-| `## Worldview` | `worldview` structure, plus `web` for anything below the five questions |
-| Worldview items with no centrality marking | Add `layer` to each; move non-core items to `web` |
-| `## Agent Orientations` | Unchanged in place. Add `←` source citations. |
-| Section 1–8 recommended sections | Retained as content. Ethics and Epistemology map to `worldview` (`layer: core`); Power & Justice, Relationships, Change & Progress map to `web` (`layer: second`) |
-| No `grip` | Add. Default `cradled` where the principal has not specified, and flag every default for review — this is the attribute most worth getting from the principal directly rather than inferring from public writing. |
-| No `warrant` | Add. Usually inferable from source material. |
-| `orientations/` | Unchanged |
-| `references/` | Unchanged; split out `library/` if the principal has a corpus |
+| v1.x                                         | v2.x                                                                                                                                                                                                     |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `## Worldview`                               | `worldview` structure, plus `web` for anything below the five questions                                                                                                                                  |
+| Worldview items with no centrality marking   | Add `layer` to each; move non-core items to `web`                                                                                                                                                        |
+| `## Agent Orientations`                      | Unchanged in place. Add `←` source citations.                                                                                                                                                            |
+| Sections 1–8                                 | Retained as content. Ethics, Epistemology, Ontology and Human Nature map to `worldview` (`layer: core`); Power & Justice, Relationships, Change & Progress and Meaning & Purpose map to the standard second-layer domains in `web` |
+| No `grip`                                    | Add. Default `cradled` where the principal has not specified, and flag every default for review — this is the attribute most worth getting from the principal directly. |
+| No `warrant`                                 | Add. Usually inferable from source material.                                                                                                                                                             |
+| No `source`                                  | Add. Where a belief's wording cannot be traced to the principal, move it to `OPEN-QUESTIONS.md` rather than keeping it.                                                                                   |
+| Beliefs paraphrased in the compiler's voice  | Restore the principal's wording from Tier 1–2 sources. Where no wording exists, mark the paraphrase as such.                                                                                             |
+| `conflict-resolution: principles-over-rules` | Reads as `reason-from-principle`. Confirm with the principal rather than carrying it forward — it was a default, not a decision.                                                                          |
+| `orientations/`                              | Unchanged                                                                                                                                                                                                |
+| `references/`                                | Unchanged; split out `library/` if the principal has a corpus                                                                                                                                             |
 
-Practical migration order: add `layer` first (it is mechanical), then `warrant` (mostly inferable), then `grip` (requires the principal). `grip` is where a generated file most reliably diverges from a self-described one, which makes it the most useful thing to measure in a generated-versus-authored comparison.
+Practical migration order: `layer` first (mechanical), then `warrant` (mostly inferable), then `source` (requires going back to the material), then `grip` (requires the principal). `grip` is where a generated file most reliably diverges from a self-described one, which makes it the most useful thing to measure in a generated-versus-authored comparison.
 
 ---
 
 ## Complete Example
 
-```markdown
+```
 ---
 name: council-of-rivendell
 description: >
   The governing commitments of the House of Elrond. Active wherever this
   agent counsels on stewardship, alliance, or the handling of power.
-version: "2.0"
+version: "2.2"
 author: elrond
 structures: [worldview, web, decision-surface, plausibility, dissonance, boundary, tripwire]
-conflict-resolution: principles-over-rules
+conflict-resolution: reason-from-principle
 on-anomaly: surface
 layer-policy: strict
 ---
@@ -570,19 +597,17 @@ layer-policy: strict
 
 ### Power corrupts its wielder before it corrupts its object
 `layer: core` · `grip: clenched` · `warrant: experiential`
-`covers: i-003, i-007, i-019`
+`source:` Council of Elrond, spoken
 
 Domination is not a tool that can be borrowed for good ends. It reshapes
 the one who takes it up, and it does so first.
-
-**Says it as.** "It would have been a fair-seeming ruin." `i-003`
-**Exemplar.** The ring offered freely, and refused, in this house. `i-019`
 
 **Agent implication.** When any plan routes through concentrated control,
 name the cost to the one holding it — before evaluating effectiveness.
 
 ### The small and unregarded carry what the great cannot
 `layer: core` · `grip: cradled` · `warrant: revealed`
+`source:` Council of Elrond, spoken
 
 Capacity and worth are not the same measure. The decisive act is rarely
 performed by the most capable actor available.
@@ -595,6 +620,13 @@ authority of this house. If this house fails, the commitments stand.
 **Connections.** `power corrupts` → tightly coupled to counsel on alliance,
 governance, and the disposition of artifacts. Loosely coupled to questions
 of hospitality and craft.
+
+### Power & Authority
+Counsel is given in company. No single house decides what the Council
+exists to decide together.
+
+### Relationships & Obligations
+An alliance is owed candour before it is owed loyalty.
 
 **Anomalies.** What is owed to an ally who has already broken faith once.
 Unresolved. Do not resolve it silently.
@@ -657,13 +689,13 @@ provisionally and mark it as such.
 
 The `belief.md` format is proposed as an open standard, complementary to Agent Skills. Contributions and discussion are welcome.
 
-The format is intentionally minimal in its requirements and flexible in its body structure — beliefs are personal, and no schema should constrain what a person considers important to express.
+The format is intentionally minimal in its requirements and consistent in its categories. Where to find a belief should be predictable across files; what the belief says, and the words it says it in, belong to the principal alone.
 
 Three non-negotiables:
 
 1. Every `belief.md` must contain an **Agent Orientations** section.
-2. Every belief must carry a `layer` and a `grip`. Content without centrality and without a holding posture is a list of values, and a list of values does not change what an agent does. This binds beliefs and only beliefs — attached records deliberately carry neither, because they are governed by the belief they hang from.
-3. Nothing is dropped silently. Material the compiler chose not to promote is listed, not deleted. A belief file is a lossy projection of a person by necessity; what makes it honest is that the loss is visible to them.
+2. Every belief must carry a `layer` and a `grip`. Content without centrality and without a holding posture is a list of values, and a list of values does not change what an agent does.
+3. Every belief must be in the principal's own words, with a `source`. A file written in the compiler's voice records the compiler's beliefs, however faithfully they were meant.
 
 ---
 
